@@ -20,12 +20,14 @@ func SeedClasses(db *gorm.DB) {
 			{
 				ID:        1,
 				Name:      "7 A",
+				SchoolID:  1,
 				CreatedAt: t1,
 				UpdatedAt: t1,
 			},
 			{
 				ID:        2,
 				Name:      "7 B",
+				SchoolID:  1,
 				CreatedAt: t2,
 				UpdatedAt: t2,
 			},
