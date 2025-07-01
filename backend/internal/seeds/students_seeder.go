@@ -8,6 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
+func uintPtr(i uint) *uint {
+	return &i
+}
+
 func SeedStudents(db *gorm.DB) {
 	var count int64
 	db.Model(&models.Student{}).Count(&count)
@@ -21,7 +25,7 @@ func SeedStudents(db *gorm.DB) {
 			WhatsApp   string
 			BirthPlace string
 			Born       time.Time
-			ParentID   uint
+			ParentID   *uint
 			SchoolID   uint
 			ClassID    uint
 			RFID       string
@@ -35,7 +39,7 @@ func SeedStudents(db *gorm.DB) {
 				WhatsApp:   "081234567890",
 				BirthPlace: "City A",
 				Born:       time.Date(2005, time.January, 15, 0, 0, 0, 0, time.UTC),
-				ParentID:   1,
+				ParentID:   uintPtr(1),
 				SchoolID:   1,
 				ClassID:    1,
 				RFID:       "RFID123456",
@@ -49,7 +53,7 @@ func SeedStudents(db *gorm.DB) {
 				WhatsApp:   "089876543210",
 				BirthPlace: "City B",
 				Born:       time.Date(2006, time.February, 20, 0, 0, 0, 0, time.UTC),
-				ParentID:   1,
+				ParentID:   uintPtr(1),
 				SchoolID:   1,
 				ClassID:    1,
 				RFID:       "RFID654321",

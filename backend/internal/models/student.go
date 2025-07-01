@@ -12,7 +12,7 @@ type Student struct {
 	WhatsApp   string    `json:"whatsapp" gorm:"size:20"`
 	BirthPlace string    `json:"birth_place" gorm:"size:100"`
 	Born       time.Time `json:"born"`
-	ParentID   uint      `json:"parent_id"`
+	ParentID   *uint     `json:"parent_id"`
 	Parent     *Parent   `json:"parent,omitempty" gorm:"foreignKey:ParentID;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:CASCADE"`
 	SchoolID   uint      `json:"school_id" gorm:"not null"`
 	School     *School   `json:"school,omitempty" gorm:"foreignKey:SchoolID;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:CASCADE"`
@@ -23,12 +23,15 @@ type Student struct {
 }
 
 type StudentResponse struct {
-	ID       uint            `json:"id"`
-	FullName string          `json:"full_name"`
-	RFID     string          `json:"rfid"`
-	NISN     string          `json:"nisn"`
-	Class    *ClassResponse  `json:"class,omitempty"`
-	Parent   *ParentResponse `json:"parent,omitempty"`
+	ID         uint            `json:"id"`
+	FullName   string          `json:"full_name"`
+	WhatsApp   string          `json:"whatsapp"`
+	BirthPlace string          `json:"birth_place"`
+	Born       time.Time       `json:"born"`
+	RFID       string          `json:"rfid"`
+	NISN       string          `json:"nisn"`
+	Class      *ClassResponse  `json:"class,omitempty"`
+	Parent     *ParentResponse `json:"parent,omitempty"`
 }
 
 type ClassResponse struct {
