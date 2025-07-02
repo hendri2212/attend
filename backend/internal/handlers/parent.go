@@ -3,6 +3,7 @@ package handlers
 import (
 	"attend/internal/models"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -24,14 +25,20 @@ func (h *ParentHandler) GetParents(c *gin.Context) {
 	c.JSON(http.StatusOK, parents)
 }
 
-// func (h *LeaderHandler) CreateLeader(c *gin.Context) {
-// 	var leader models.Leader
-// 	if err := c.ShouldBindJSON(&leader); err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
+func (h *ParentHandler) CreateParent(c *gin.Context) {
+	var parent models.Parent
+	if err := c.ShouldBindJSON(&parent); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-// 	h.db.Create(&leader)
+	if strings.HasPrefix(parent.WhatsApp, "0") {
+		parent.WhatsApp = "62" + parent.WhatsApp[1:]
+	}
 
-// 	c.JSON(http.StatusCreated, leader)
-// }
+	if err := h.db.Create(&parent).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusCreated, parent)
+}
