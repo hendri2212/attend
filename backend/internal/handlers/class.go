@@ -30,34 +30,108 @@ func (h *ClassHandler) GetClassBySchool(c *gin.Context) {
 
 	query.Find(&classes)
 
-	type SchoolMinimal struct {
+	type ClassResponse struct {
 		ID   uint   `json:"id"`
 		Name string `json:"name"`
-	}
-
-	type ClassResponse struct {
-		ID        uint          `json:"id"`
-		Name      string        `json:"name"`
-		SchoolID  uint          `json:"school_id"`
-		School    SchoolMinimal `json:"school"`
-		CreatedAt string        `json:"created_at"`
-		UpdatedAt string        `json:"updated_at"`
 	}
 
 	var response []ClassResponse
 	for _, class := range classes {
 		response = append(response, ClassResponse{
-			ID:       class.ID,
-			Name:     class.Name,
-			SchoolID: class.SchoolID,
-			School: SchoolMinimal{
-				ID:   class.School.ID,
-				Name: class.School.Name,
-			},
-			CreatedAt: class.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-			UpdatedAt: class.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			ID:   class.ID,
+			Name: class.Name,
 		})
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func (h *ClassHandler) CreateClass(c *gin.Context) {
+	schoolIDInterface, exists := c.Get("school_id")
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "school_id not found in context"})
+		return
+	}
+	schoolID := schoolIDInterface.(uint)
+
+	var input struct {
+		Name string `json:"name" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	newClass := models.Class{
+		Name:     input.Name,
+		SchoolID: schoolID,
+	}
+
+	if err := h.db.Create(&newClass).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create class"})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"id":   newClass.ID,
+		"name": newClass.Name,
+	})
+}
+
+func (h *ClassHandler) GetClassByID(c *gin.Context) {
+	classID := c.Param("id")
+
+	var class models.Class
+	if err := h.db.Preload("School").First(&class, classID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Class not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":   class.ID,
+		"name": class.Name,
+	})
+}
+
+func (h *ClassHandler) UpdateClass(c *gin.Context) {
+	classID := c.Param("id")
+
+	var input struct {
+		Name string `json:"name" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	var class models.Class
+	if err := h.db.First(&class, classID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Class not found"})
+		return
+	}
+
+	class.Name = input.Name
+
+	if err := h.db.Save(&class).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update class"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":   class.ID,
+		"name": class.Name,
+	})
+}
+
+func (h *ClassHandler) DeleteClass(c *gin.Context) {
+	classID := c.Param("id")
+
+	if err := h.db.Delete(&models.Class{}, classID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete class"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Class deleted successfully"})
 }
