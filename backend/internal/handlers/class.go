@@ -13,7 +13,6 @@ type ClassHandler struct {
 }
 
 func ClassesHandler(db *gorm.DB) *ClassHandler {
-	db.AutoMigrate(&models.Class{})
 	return &ClassHandler{db: db}
 }
 

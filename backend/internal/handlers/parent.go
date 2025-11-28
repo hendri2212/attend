@@ -14,7 +14,6 @@ type ParentHandler struct {
 }
 
 func ParentsHandler(db *gorm.DB) *ParentHandler {
-	db.AutoMigrate(&models.Parent{})
 	return &ParentHandler{db: db}
 }
 

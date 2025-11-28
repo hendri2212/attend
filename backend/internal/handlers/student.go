@@ -102,9 +102,13 @@ func (h *StudentHandler) GetStudents(c *gin.Context) {
 	responses := make([]models.StudentResponse, 0, len(students))
 	for _, s := range students {
 		r := models.StudentResponse{
-			ID:       s.UserID,
-			FullName: s.FullName,
-			RFID:     s.RFID,
+			ID:         s.UserID,
+			FullName:   s.FullName,
+			RFID:       s.RFID,
+			WhatsApp:   s.WhatsApp,
+			Born:       s.Born,
+			BirthPlace: s.BirthPlace,
+			NISN:       s.NISN,
 		}
 		if s.Class != nil {
 			r.Class = &models.ClassResponse{
@@ -303,7 +307,6 @@ type StudentHandler struct {
 
 func StudentsHandler(db *gorm.DB) *StudentHandler {
 	db.Logger = db.Logger.LogMode(logger.Warn)
-	db.AutoMigrate(&models.Student{}, &models.Class{}, &models.Parent{})
 
 	httpClient := &http.Client{
 		Timeout: 5 * time.Second,

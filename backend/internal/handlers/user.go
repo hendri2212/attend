@@ -16,7 +16,6 @@ type UserHandler struct {
 }
 
 func UsersHandler(db *gorm.DB) *UserHandler {
-	db.AutoMigrate(&models.User{})
 	return &UserHandler{db: db}
 }
 
