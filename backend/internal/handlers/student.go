@@ -276,6 +276,30 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+func (h *StudentHandler) DeleteStudent(c *gin.Context) {
+	idParam := c.Param("id")
+	id, err := strconv.ParseUint(idParam, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid student id"})
+		return
+	}
+
+	if err := h.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Delete(&models.Student{}, "user_id = ?", id).Error; err != nil {
+			return err
+		}
+		if err := tx.Delete(&models.User{}, "id = ?", id).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete student"})
+		return
+	}
+
+	c.Status(http.StatusOK)
+}
+
 var bulanIndonesia = map[time.Month]string{
 	time.January:   "Januari",
 	time.February:  "Februari",

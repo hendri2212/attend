@@ -63,10 +63,18 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		api.POST("/students", studentsHandler.SaveStudent)
 		api.GET("/students/:id", studentsHandler.GetStudentByID)
 		api.PUT("/students/:id", studentsHandler.UpdateStudent)
+		api.DELETE("/students/:id", studentsHandler.DeleteStudent)
 
 		api.GET("/classes", classesHandler.GetClassBySchool)
+		api.POST("/classes", classesHandler.CreateClass)
+		api.GET("/classes/:id", classesHandler.GetClassByID)
+		api.PUT("/classes/:id", classesHandler.UpdateClass)
+		api.DELETE("/classes/:id", classesHandler.DeleteClass)
 
 		api.GET("/parents", parentsHandler.GetParents)
 		api.POST("/parents", parentsHandler.CreateParent)
+		api.GET("/parents/:id", parentsHandler.GetParentByID)
+		api.PUT("/parents/:id", parentsHandler.UpdateParent)
+		api.DELETE("/parents/:id", parentsHandler.DeleteParent)
 	}
 }

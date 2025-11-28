@@ -1,5 +1,5 @@
 <template>
-    <div class="card border-0 bg-body-tertiary" style="height: calc(100vh - 120px);">
+    <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                <RouterLink :to="{ name: 'create-student' }" class="btn btn-primary d-flex align-items-center">
@@ -18,19 +18,24 @@
                     <div class="row gx-3 w-100">
                         <div class="col-12 col-md-3">
                             <span class="fw-bold text-dark">{{ student.full_name }}</span>
-                            <small class="d-block text-muted">{{ student.rfid }}</small>
+                            <small class="d-block text-muted">RFID: {{ student.rfid || '-' }}</small>
+                            <small class="d-block text-muted">NISN: {{ student.nisn || '-' }}</small>
                         </div>
                         <div class="col-12 col-md-3">
                             <small class="d-block text-muted">Kelas</small>
-                            <span class="fw-bold text-dark">{{ student.class.name }}</span>
+                            <span class="fw-bold text-dark">{{ student.class?.name || '-' }}</span>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <small class="d-block text-muted">Tempat / Tgl Lahir</small>
+                            <span class="fw-bold text-dark">
+                                {{ student.birth_place || '-' }}<template v-if="student.birth_place && student.born">, </template>{{ formatDateID(student.born) }}
+                            </span>
+                            <small class="d-block text-muted">No. Whatsapp</small>
+                            <span class="fw-bold text-dark">{{ student.whatsapp || '-' }}</span>
                         </div>
                         <div class="col-12 col-md-3">
                             <small class="d-block text-muted">Orang Tua</small>
                             <span class="fw-bold text-dark">{{ student.parent?.full_name || '-' }}</span>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <small class="d-block text-muted">No. Whatsapp</small>
-                            <span class="fw-bold text-dark">{{ student.parent?.whatsapp || '-' }}</span>
                         </div>
                     </div>
                 </div>
@@ -62,7 +67,17 @@ function edit(student) {
 }
 
 function askDelete(student) {
-    console.log('Ask delete for', student)
+    if (student?.id && confirm(`Hapus data siswa "${student.full_name}"?`)) {
+        const token = localStorage.getItem('token')
+        axios
+            .delete(`${apiBaseUrl}/students/${student.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+            .then(() => {
+                students.value = students.value.filter(s => s.id !== student.id)
+            })
+            .catch(err => { console.error('Failed to delete student', err) })
+    }
 }
 
 onMounted(() => {
@@ -74,6 +89,13 @@ onMounted(() => {
         .then(res => { students.value = res.data.data })
         .catch(err => { console.error('Failed to fetch students', err) })
 })
+
+function formatDateID(value) {
+    if (!value) return '-'
+    const date = new Date(value)
+    if (Number.isNaN(date)) return '-'
+    return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'long', year: 'numeric' }).format(date)
+}
 </script>
 <style scoped>
 .avatar {

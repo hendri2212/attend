@@ -33,7 +33,15 @@ func main() {
 	db := InitDB()
 
 	// Auto migrate
-	db.AutoMigrate(&models.School{}, &models.Class{}, &models.Parent{}, &models.User{}, &models.Student{}, &models.Teacher{})
+	db.AutoMigrate(
+		&models.School{},
+		&models.Class{},
+		&models.Parent{},
+		&models.User{},
+		&models.Student{},
+		&models.Teacher{},
+		&models.Attendance{},
+	)
 
 	// Seed data
 	seeds.SeedAll(db)

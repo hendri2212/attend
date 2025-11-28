@@ -48,6 +48,30 @@ const router = createRouter({
                     }
                 },
                 {
+                    path: 'classes',
+                    name: 'classes',
+                    component: () => import('../components/school/DataClasses.vue'),
+                    meta: {
+                        title: 'Data Kelas',
+                    },
+                },
+                {
+                    path: 'classes/create',
+                    name: 'create-class',
+                    component: () => import('../components/school/AddClass.vue'),
+                    meta: {
+                        title: 'Tambah Kelas',
+                    }
+                },
+                {
+                    path: 'classes/:id/edit',
+                    name: 'edit-class',
+                    component: () => import('../components/school/EditClass.vue'),
+                    meta: {
+                        title: 'Edit Kelas',
+                    }
+                },
+                {
                     path: 'students',
                     name: 'students',
                     component: () => import('../components/student/DataStudents.vue'),
@@ -85,6 +109,14 @@ const router = createRouter({
                     component: () => import('../components/parent/AddParent.vue'),
                     meta: {
                         title: 'Tambah Orang Tua',
+                    }
+                },
+                {
+                    path: 'parents/:id/edit',
+                    name: 'edit-parent',
+                    component: () => import('../components/parent/EditParent.vue'),
+                    meta: {
+                        title: 'Edit Orang Tua',
                     }
                 },
             ],
