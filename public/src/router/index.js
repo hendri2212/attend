@@ -96,6 +96,14 @@ const router = createRouter({
                     }
                 },
                 {
+                    path: 'import-students',
+                    name: 'import-students',
+                    component: () => import('../components/student/ImportStudents.vue'),
+                    meta: {
+                        title: 'Import Data Siswa',
+                    }
+                },
+                {
                     path: 'parents',
                     name: 'parents',
                     component: () => import('../components/parent/DataParents.vue'),

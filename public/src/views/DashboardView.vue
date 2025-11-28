@@ -54,6 +54,36 @@
                         </RouterLink>
                     </li>
                 </ul>
+                <hr>
+                <div class="mt-3">
+                    <p class="text-uppercase text-secondary fw-semibold small mb-2">Absensi</p>
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li>
+                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                                <i class="bi bi-clipboard-check me-2" width="16" height="16"></i>
+                                Data Absen
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                                <i class="bi bi-file-earmark-text me-2" width="16" height="16"></i>
+                                Laporan
+                            </RouterLink>
+                        </li>
+                        <li>
+                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                                <i class="bi bi-bar-chart-line me-2" width="16" height="16"></i>
+                                Grafik
+                            </RouterLink>
+                        </li>
+                        <!-- <li>
+                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                                <i class="bi bi-clipboard-data me-2" width="16" height="16"></i>
+                                Rekap Sakit / Izin / Alpha
+                            </RouterLink>
+                        </li> -->
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="ms-3 w-100">

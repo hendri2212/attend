@@ -1,5 +1,5 @@
 <template>
-    <div class="card border-0 bg-body-tertiary mb-3">
+    <div class="card border-0 bg-body-tertiary mb-3 navbar-sticky">
         <div class="card-body">
             <span class="fs-4 fw-bold mb-0 card-title">{{ currentTitle }}</span>
             <div class="dropdown float-end">
@@ -42,3 +42,11 @@ function logout() {
     })
 }
 </script>
+
+<style scoped>
+/* .navbar-sticky {
+    position: sticky;
+    top: 16px;
+    z-index: 1020;
+} */
+</style>
