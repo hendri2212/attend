@@ -1,5 +1,5 @@
 <template>
-    <div class="card border-0 bg-body-tertiary" style="height: calc(100vh - 120px);">
+    <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <RouterLink :to="{ name: 'create-parent' }" class="btn btn-primary d-flex align-items-center">
@@ -16,12 +16,16 @@
                     class="rounded-circle avatar" />
                 <div class="ms-3 flex-grow-1">
                     <div class="row gx-3 w-100">
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <span class="fw-bold text-dark">{{ parent.full_name }}</span>
                         </div>
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-4">
                             <small class="d-block text-muted">No. Whatsapp</small>
                             <span class="fw-bold text-dark">{{ parent.whatsapp || '-' }}</span>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <small class="d-block text-muted">Alamat</small>
+                            <span class="fw-bold text-dark">{{ parent.address || '-' }}</span>
                         </div>
                     </div>
                 </div>
@@ -40,9 +44,12 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { apiBaseUrl } from '@/config'
 
 const parents = ref([])
+
+const router = useRouter()
 
 onMounted(() => {
     const token = localStorage.getItem('token')
@@ -60,11 +67,28 @@ onMounted(() => {
 })
 
 function edit(parent) {
-    // implementasi edit
+    if (router && parent?.id) {
+        router.push({ name: 'edit-parent', params: { id: parent.id } })
+    }
 }
 
 function askDelete(parent) {
-    // implementasi delete
+    if (confirm(`Apakah Anda yakin ingin menghapus orang tua "${parent.full_name}"?`)) {
+        const token = localStorage.getItem('token')
+        axios.delete(`${apiBaseUrl}/parents/${parent.id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+        .then(() => {
+            parents.value = parents.value.filter(p => p.id !== parent.id)
+            alert('Orang tua berhasil dihapus!')
+        })
+        .catch(error => {
+            console.error('Gagal menghapus orang tua:', error)
+            alert('Gagal menghapus orang tua')
+        })
+    }
 }
 </script>
 <style scoped>

@@ -1,6 +1,6 @@
 <template>
     <div class="container-fluid py-3 bg-secondary-subtle d-flex">
-        <div class="card border-0 bg-body-tertiary" style="width: 280px;">
+        <div class="card border-0 bg-body-tertiary sidebar" style="width: 280px;">
             <div class="card-body">
                 <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-decoration-none fw-bold">
                     <svg xmlns="http://www.w3.org/2000/svg" width="40" height="32" fill="currentColor"
@@ -33,6 +33,13 @@
                       </RouterLink>
                     </li> -->
                     <li>
+                        <RouterLink :to="{ name: 'classes' }"
+                            :class="['nav-link', ['classes', 'create-class', 'edit-class'].includes(route.name) ? 'active' : 'link-body-emphasis']">
+                            <i class="bi bi-door-open me-2" width="16" height="16"></i>
+                            Kelas
+                        </RouterLink>
+                    </li>
+                    <li>
                         <RouterLink :to="{ name: 'students' }"
                             :class="['nav-link', ['students', 'create-student', 'edit-student'].includes(route.name) ? 'active' : 'link-body-emphasis']">
                             <i class="bi bi-person-badge me-2" width="16" height="16"></i>
@@ -46,14 +53,6 @@
                             Orang Tua
                         </RouterLink>
                     </li>
-                    <!-- <li>
-                      <RouterLink
-                        :to="{ name: 'classes' }"
-                        :class="['nav-link', route.name === 'classes' ? 'active' : 'link-body-emphasis']">
-                        <i class="bi bi-door-open me-2" width="16" height="16"></i>
-                        Kelas
-                      </RouterLink>
-                    </li> -->
                 </ul>
             </div>
         </div>
@@ -68,3 +67,11 @@ import Navbar from '../components/Navbar.vue'
 import { RouterLink, useRoute } from 'vue-router'
 const route = useRoute()
 </script>
+<style scoped>
+.sidebar {
+    position: sticky;
+    top: 16px;
+    align-self: flex-start;
+    max-height: calc(100vh - 32px);
+}
+</style>

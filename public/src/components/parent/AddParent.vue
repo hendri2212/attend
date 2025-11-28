@@ -19,7 +19,7 @@
                         <label for="address">Alamat</label>
                     </div>
                     <div class="btn-group float-end">
-                        <button type="button" class="btn btn-secondary" @click="() => $router.push('/admin/students')">
+                        <button type="button" class="btn btn-secondary" @click="() => $router.push('/admin/parents')">
                             Cancel
                         </button>
                         <button type="submit" class="btn btn-primary">Save</button>
