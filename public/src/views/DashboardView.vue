@@ -49,7 +49,7 @@
                     <li>
                         <RouterLink :to="{ name: 'parents' }"
                             :class="['nav-link', ['parents', 'create-parent', 'edit-parent'].includes(route.name) ? 'active' : 'link-body-emphasis']">
-                            <i class="bi bi-people-fill me-2" width="16" height="16"></i>
+                            <i class="bi bi-people me-2" width="16" height="16"></i>
                             Orang Tua
                         </RouterLink>
                     </li>

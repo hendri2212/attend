@@ -6,7 +6,7 @@
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <h5 class="mb-0 fw-bold">Daftar Siswa</h5>
                         <span class="badge rounded-pill bg-secondary-subtle text-primary d-flex align-items-center px-3 py-1">
-                            <i class="bi bi-people me-2"></i>
+                            <i class="bi bi-person me-2"></i>
                             <span class="small">{{ students.length }} Siswa</span>
                         </span>
                     </div>
