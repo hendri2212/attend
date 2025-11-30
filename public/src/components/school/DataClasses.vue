@@ -1,15 +1,29 @@
 <template>
-    <div class="card border-0 bg-body-tertiary" style="height: calc(100vh - 120px);">
+    <!-- <div class="card border-0 bg-body-tertiary" style="height: calc(100vh - 120px);"> -->
+    <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <RouterLink :to="{ name: 'create-class' }" class="btn btn-primary d-flex align-items-center">
-                    <i class="bi bi-plus-lg me-2"></i> Tambah Kelas
-                </RouterLink>
-                <div class="bg-secondary-subtle rounded-pill px-3 py-1 text-primary">
-                    <i class="bi bi-person me-2"></i>
-                    <span class="small">{{ classes.length }}</span>
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="mb-0 fw-bold">Daftar Kelas</h5>
+                        <span class="badge rounded-pill bg-secondary-subtle text-primary d-flex align-items-center px-3 py-1">
+                            <i class="bi bi-door-closed me-2"></i>
+                            <span class="small">{{ classes.length }} Kelas</span>
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Kelola daftar kelas, tambah, ubah, dan hapus sesuai kebutuhan.
+                    </p>
                 </div>
+                <RouterLink
+                    :to="{ name: 'create-class' }"
+                    class="btn btn-outline-primary d-flex align-items-center shadow-sm px-3"
+                >
+                    <i class="bi bi-plus-lg me-2"></i>
+                    <span>Kelas</span>
+                </RouterLink>
             </div>
+            <hr>
             <div v-for="classItem in classes" :key="classItem.id || classItem.name"
                 class="d-flex align-items-center mb-3 shadow-sm p-3">
                 <div class="ms-3 flex-grow-1">

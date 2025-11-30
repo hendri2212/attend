@@ -60,7 +60,7 @@ const router = createRouter({
                     name: 'create-class',
                     component: () => import('../components/school/AddClass.vue'),
                     meta: {
-                        title: 'Tambah Kelas',
+                        title: 'Data Kelas',
                     }
                 },
                 {
@@ -68,7 +68,7 @@ const router = createRouter({
                     name: 'edit-class',
                     component: () => import('../components/school/EditClass.vue'),
                     meta: {
-                        title: 'Edit Kelas',
+                        title: 'Data Kelas',
                     }
                 },
                 {
@@ -84,7 +84,7 @@ const router = createRouter({
                     name: 'create-student',
                     component: () => import('../components/student/AddStudent.vue'),
                     meta: {
-                        title: 'Tambah Siswa',
+                        title: 'Data Siswa',
                     }
                 },
                 {
@@ -92,7 +92,7 @@ const router = createRouter({
                     name: 'edit-student',
                     component: () => import('../components/student/EditStudent.vue'),
                     meta: {
-                        title: 'Edit Siswa',
+                        title: 'Data Siswa',
                     }
                 },
                 {
@@ -100,7 +100,7 @@ const router = createRouter({
                     name: 'import-students',
                     component: () => import('../components/student/ImportStudents.vue'),
                     meta: {
-                        title: 'Import Data Siswa',
+                        title: 'Data Siswa',
                     }
                 },
                 {
@@ -116,7 +116,7 @@ const router = createRouter({
                     name: 'create-parent',
                     component: () => import('../components/parent/AddParent.vue'),
                     meta: {
-                        title: 'Tambah Orang Tua',
+                        title: 'Data Orang Tua Siswa',
                     }
                 },
                 {
@@ -124,9 +124,17 @@ const router = createRouter({
                     name: 'edit-parent',
                     component: () => import('../components/parent/EditParent.vue'),
                     meta: {
-                        title: 'Edit Orang Tua',
+                        title: 'Data Orang Tua Siswa',
                     }
                 },
+                {
+                    path: 'attendance',
+                    name: 'attendance',
+                    component: () => import('../components/attendance/DataAttendance.vue'),
+                    meta: {
+                        title: 'Data Kehadiran Siswa',
+                    },
+                }
             ],
         },
     ],

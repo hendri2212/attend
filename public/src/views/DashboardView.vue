@@ -59,7 +59,8 @@
                     <p class="text-uppercase text-secondary fw-semibold small mb-2">Absensi</p>
                     <ul class="nav nav-pills flex-column gap-1">
                         <li>
-                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                            <RouterLink :to="{ name: 'attendance' }"
+                                :class="['nav-link', ['attendance'].includes(route.name) ? 'active' : 'link-body-emphasis']">
                                 <i class="bi bi-clipboard-check me-2" width="16" height="16"></i>
                                 Data Absen
                             </RouterLink>

@@ -1,15 +1,24 @@
 <template>
     <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <RouterLink :to="{ name: 'create-parent' }" class="btn btn-primary d-flex align-items-center">
-                    <i class="bi bi-plus-lg me-2"></i> Tambah Orang Tua
-                </RouterLink>
-                <div class="bg-secondary-subtle rounded-pill px-3 py-1 text-primary">
-                    <i class="bi bi-person me-2"></i>
-                    <span class="small">{{ parents.length }}</span>
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="mb-0 fw-bold">Daftar Orang Tua</h5>
+                        <span class="badge rounded-pill bg-secondary-subtle text-primary d-flex align-items-center px-3 py-1">
+                            <i class="bi bi-people me-2"></i>
+                            <span class="small">{{ parents.length }} Orang Tua</span>
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Kelola daftar orang tua, tambah, ubah, dan hapus sesuai kebutuhan.
+                    </p>
                 </div>
+                <RouterLink :to="{ name: 'create-parent' }" class="btn btn-outline-primary d-flex align-items-center">
+                    <i class="bi bi-plus-lg me-2"></i>Orang Tua
+                </RouterLink>
             </div>
+            <hr>
             <div v-for="parent in parents" :key="parent.id || parent.full_name"
                 class="d-flex align-items-center mb-3 shadow-sm p-3">
                 <img :src="`https://i.pravatar.cc/150?u=${parent.full_name}`" :alt="`Avatar ${parent.full_name}`"

@@ -1,7 +1,7 @@
 <template>
     <div class="d-flex flex-column vh-100 p-0">
         <header class="bg-primary text-white text-center py-3 d-flex align-items-center justify-content-center">
-            <img src="/logo.png" alt="Logo" class="inline-block mr-2" style="width: 120px; height: auto;">
+            <img src="/logo.png" alt="Logo" class="inline-block mr-6" style="width: 90px; height: auto; margin-right: 20px;" />
             <h1 class="display-1 fw-bold mb-0">SMPN 1 KOTABARU</h1>
         </header>
         <div class="d-flex flex-fill p-0">

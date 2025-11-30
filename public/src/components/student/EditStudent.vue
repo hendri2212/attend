@@ -1,6 +1,17 @@
 <template>
-    <div class="card border-0 bg-body-tertiary" style="height: calc(100vh - 120px);">
+    <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center justify-content-start mb-3 gap-2">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="mb-0 fw-bold">Edit Siswa</h5>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Kelola daftar siswa, tambah, ubah, dan hapus sesuai kebutuhan.
+                    </p>
+                </div>
+            </div>
+            <hr>
             <form @submit.prevent="submitForm">
                 <div class="d-flex gap-2">
                     <div class="col">

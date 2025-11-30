@@ -1,10 +1,22 @@
 <template>
     <div class="card border-0 bg-body-tertiary">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <div class="d-flex align-items-center gap-2">
-                    <RouterLink :to="{ name: 'create-student' }" class="btn btn-primary d-flex align-items-center">
-                        <i class="bi bi-plus-lg me-2"></i> Tambah Siswa
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <h5 class="mb-0 fw-bold">Daftar Siswa</h5>
+                        <span class="badge rounded-pill bg-secondary-subtle text-primary d-flex align-items-center px-3 py-1">
+                            <i class="bi bi-people me-2"></i>
+                            <span class="small">{{ students.length }} Siswa</span>
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        Kelola daftar siswa, tambah, ubah, dan hapus sesuai kebutuhan.
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <RouterLink :to="{ name: 'create-student' }" class="btn btn-outline-primary d-flex align-items-center">
+                        <i class="bi bi-plus-lg me-2"></i>Siswa
                     </RouterLink>
                     <button
                         type="button"
@@ -15,12 +27,8 @@
                         Import Siswa
                     </button>
                 </div>
-                <div class="bg-secondary-subtle rounded-pill px-3 py-1 text-primary">
-                    <i class="bi bi-person me-2"></i>
-                    <span class="small">{{ students.length }}</span>
-                </div>
             </div>
-
+            <hr>
             <div v-if="students.length === 0" class="text-center text-muted py-4 small">
                 Tidak ada data siswa.
             </div>
