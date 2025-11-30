@@ -33,7 +33,8 @@ func main() {
 	db := InitDB()
 
 	// Auto migrate
-	db.AutoMigrate(
+	// Auto migrate
+	if err := db.AutoMigrate(
 		&models.School{},
 		&models.Class{},
 		&models.Parent{},
@@ -41,7 +42,9 @@ func main() {
 		&models.Student{},
 		&models.Teacher{},
 		&models.Attendance{},
-	)
+	); err != nil {
+		log.Fatal("failed to migrate database: ", err)
+	}
 
 	// Seed data
 	seeds.SeedAll(db)

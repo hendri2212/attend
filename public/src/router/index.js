@@ -134,6 +134,14 @@ const router = createRouter({
                     meta: {
                         title: 'Data Kehadiran Siswa',
                     },
+                },
+                {
+                    path: 'report',
+                    name: 'report',
+                    component: () => import('../components/report/DataReport.vue'),
+                    meta: {
+                        title: 'Laporan',
+                    },
                 }
             ],
         },

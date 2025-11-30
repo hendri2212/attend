@@ -4,10 +4,12 @@ import (
 	"attend/internal/models"
 	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func (h *StudentHandler) GetStudentByRFID(c *gin.Context) {
@@ -52,6 +54,50 @@ func (h *StudentHandler) GetStudentByRFID(c *gin.Context) {
 		return
 	}
 
+	const duplicateGap = 5 * time.Minute
+	today := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
+	if err := h.db.Transaction(func(tx *gorm.DB) error {
+		var attendance models.Attendance
+		err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			First(&attendance, "student_id = ? AND date = ?", res.ID, today).
+			Error
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			checkIn := now
+			return tx.Create(&models.Attendance{
+				StudentID: res.ID,
+				Date:      today,
+				CheckInAt: &checkIn,
+				Method:    "rfid",
+			}).Error
+		}
+		if err != nil {
+			return err
+		}
+
+		if attendance.CheckOutAt != nil {
+			return nil
+		}
+		if attendance.CheckInAt == nil {
+			checkIn := now
+			return tx.Model(&attendance).Updates(map[string]interface{}{
+				"check_in_at": checkIn,
+				"method":      "rfid",
+			}).Error
+		}
+		if now.Sub(*attendance.CheckInAt) < duplicateGap {
+			return nil
+		}
+		checkOut := now
+		return tx.Model(&attendance).Updates(map[string]interface{}{
+			"check_out_at": checkOut,
+			"method":       "rfid",
+		}).Error
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to record attendance"})
+		return
+	}
+
 	response := models.StudentResponse{
 		ID:       res.ID,
 		FullName: res.FullName,
@@ -90,4 +136,143 @@ func (h *StudentHandler) GetStudentByRFID(c *gin.Context) {
 	default:
 		// Queue full, drop silently or log if needed
 	}
+}
+
+func (h *StudentHandler) GetAttendance(c *gin.Context) {
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(c.DefaultQuery("page_size", "20"))
+	if page < 1 {
+		page = 1
+	}
+	if size < 1 || size > 1000 { // Allow larger size for reports
+		size = 20
+	}
+	offset := (page - 1) * size
+
+	startDateStr := c.Query("start_date")
+	endDateStr := c.Query("end_date")
+	classIDStr := c.Query("class_id")
+
+	// If no date filter, use standard pagination
+	if startDateStr == "" || endDateStr == "" {
+		var attendances []models.Attendance
+		query := h.db.
+			Preload("Student").
+			Preload("Student.Class").
+			Order("date DESC, created_at DESC")
+
+		if classIDStr != "" {
+			query = query.Joins("JOIN students ON students.user_id = attendances.student_id").
+				Where("students.class_id = ?", classIDStr)
+		}
+
+		if err := query.
+			Limit(size).
+			Offset(offset).
+			Find(&attendances).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"data":      attendances,
+			"page":      page,
+			"page_size": size,
+		})
+		return
+	}
+
+	// If date filter exists, generate report including absent students
+	startDate, err := time.Parse("2006-01-02", startDateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid start_date format"})
+		return
+	}
+	endDate, err := time.Parse("2006-01-02", endDateStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid end_date format"})
+		return
+	}
+
+	// 1. Fetch Students
+	var students []models.Student
+	studentQuery := h.db.Preload("Class")
+	if classIDStr != "" {
+		studentQuery = studentQuery.Where("class_id = ?", classIDStr)
+	}
+	if err := studentQuery.Find(&students).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch students"})
+		return
+	}
+
+	// 2. Fetch Existing Attendance
+	var attendances []models.Attendance
+	attQuery := h.db.
+		Preload("Student").
+		Preload("Student.Class").
+		Where("date >= ? AND date <= ?", startDate, endDate)
+
+	if classIDStr != "" {
+		attQuery = attQuery.Joins("JOIN students ON students.user_id = attendances.student_id").
+			Where("students.class_id = ?", classIDStr)
+	}
+
+	if err := attQuery.Find(&attendances).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch attendance"})
+		return
+	}
+
+	// Map: Date -> StudentID -> Attendance
+	attMap := make(map[string]map[uint]models.Attendance)
+	for _, att := range attendances {
+		dateStr := att.Date.Format("2006-01-02")
+		if _, ok := attMap[dateStr]; !ok {
+			attMap[dateStr] = make(map[uint]models.Attendance)
+		}
+		attMap[dateStr][att.StudentID] = att
+	}
+
+	// 3. Generate Full Report
+	var report []models.Attendance
+	currentDate := startDate
+	for !currentDate.After(endDate) {
+		dateStr := currentDate.Format("2006-01-02")
+
+		for _, student := range students {
+			if att, ok := attMap[dateStr][student.UserID]; ok {
+				report = append(report, att)
+			} else {
+				// Create Absent Record
+				// Use a copy of student to avoid pointer issues if needed, but here it's fine
+				s := student
+				report = append(report, models.Attendance{
+					Date:      currentDate,
+					StudentID: s.UserID,
+					Student:   &s,
+					Method:    "", // Empty method implies absent/no record
+				})
+			}
+		}
+		currentDate = currentDate.AddDate(0, 0, 1)
+	}
+
+	// Pagination (In-Memory)
+	total := len(report)
+	start := offset
+	end := offset + size
+	if start > total {
+		start = total
+	}
+	if end > total {
+		end = total
+	}
+
+	pagedData := report[start:end]
+
+	c.JSON(http.StatusOK, gin.H{
+		"data":      pagedData,
+		"page":      page,
+		"page_size": size,
+		"total":     total,
+	})
 }

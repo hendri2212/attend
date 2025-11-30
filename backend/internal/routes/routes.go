@@ -76,5 +76,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 		api.GET("/parents/:id", parentsHandler.GetParentByID)
 		api.PUT("/parents/:id", parentsHandler.UpdateParent)
 		api.DELETE("/parents/:id", parentsHandler.DeleteParent)
+
+		api.GET("/attendance", studentsHandler.GetAttendance)
 	}
 }
