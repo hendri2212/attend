@@ -21,7 +21,7 @@
                     <button
                         type="button"
                         class="btn btn-outline-primary d-flex align-items-center"
-                        @click="goToImport"
+                        @click="openImportModal"
                     >
                         <i class="bi bi-upload me-2"></i>
                         Import Siswa
@@ -79,16 +79,71 @@
                 </div>
             </div>
         </div>
+
+        <!-- Import Modal -->
+        <div v-if="showImportModal" class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Import Data Siswa</h5>
+                        <button type="button" class="btn-close" @click="showImportModal = false"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="alert alert-info small">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Gunakan format Excel (.xlsx) yang sesuai.
+                            <a href="/format_import_students.xlsx" download class="fw-bold">Download Template</a>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Pilih File Excel</label>
+                            <input type="file" class="form-control" accept=".xlsx" @change="handleFileChange">
+                        </div>
+
+                        <div v-if="importLoading" class="text-center py-2">
+                            <div class="spinner-border text-primary" role="status"></div>
+                            <p class="small text-muted mt-2">Sedang memproses...</p>
+                        </div>
+
+                        <div v-if="importResult.message" class="alert alert-success mt-3 small">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {{ importResult.message }} ({{ importResult.successCount }} berhasil)
+                        </div>
+
+                        <div v-if="importResult.errors.length > 0" class="alert alert-danger mt-3 small" style="max-height: 200px; overflow-y: auto;">
+                            <strong>Gagal:</strong>
+                            <ul class="mb-0 ps-3">
+                                <li v-for="(err, idx) in importResult.errors" :key="idx">{{ err }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="showImportModal = false">Tutup</button>
+                        <button type="button" class="btn btn-primary" :disabled="importLoading" @click="uploadFile">Upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiBaseUrl } from '@/config'
 
 const students = ref([])
 const loading = ref(false)
+
+// Import Logic
+const showImportModal = ref(false)
+const importFile = ref(null)
+const importLoading = ref(false)
+const importResult = reactive({
+    message: '',
+    successCount: 0,
+    errors: []
+})
 
 const router = useRouter()
 
@@ -135,9 +190,53 @@ const askDelete = (student) => {
     }
 }
 
-const goToImport = () => {
-    // Sesuaikan dengan nama rute halaman import siswa di konfigurasi router-mu
-    router.push({ name: 'import-students' })
+// Open Import Modal
+const openImportModal = () => {
+    showImportModal.value = true
+    importFile.value = null
+    importResult.message = ''
+    importResult.successCount = 0
+    importResult.errors = []
+}
+
+const handleFileChange = (event) => {
+    importFile.value = event.target.files[0]
+}
+
+const uploadFile = async () => {
+    if (!importFile.value) {
+        alert('Pilih file terlebih dahulu!')
+        return
+    }
+
+    importLoading.value = true
+    importResult.message = ''
+    importResult.errors = []
+
+    const formData = new FormData()
+    formData.append('file', importFile.value)
+
+    try {
+        const { data } = await axios.post(`${apiBaseUrl}/students/import`, formData, {
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        
+        importResult.message = data.message
+        importResult.successCount = data.success_count
+        importResult.errors = data.errors || []
+        
+        if (data.success_count > 0) {
+            fetchStudents() // Refresh list
+        }
+    } catch (error) {
+        console.error(error)
+        importResult.errors = [error.response?.data?.error || 'Gagal mengupload file']
+    } finally {
+        importLoading.value = false
+    }
 }
 
 onMounted(() => {

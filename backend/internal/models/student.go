@@ -9,11 +9,11 @@ type Student struct {
 	NISN       string    `json:"nisn" gorm:"size:20;uniqueIndex"`
 	FullName   string    `json:"full_name" gorm:"size:100"`
 	Photo      string    `json:"photo" gorm:"size:255"`
-	WhatsApp   string    `json:"whatsapp" gorm:"size:20"`
+	WhatsApp   string    `json:"whatsapp" gorm:"size:20;uniqueIndex"`
 	BirthPlace string    `json:"birth_place" gorm:"size:100"`
 	Born       time.Time `json:"born"`
 	ParentID   *uint     `json:"parent_id"`
-	Parent     *Parent   `json:"parent,omitempty" gorm:"foreignKey:ParentID;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:CASCADE"`
+	Parent     *Parent   `json:"parent,omitempty" gorm:"foreignKey:ParentID;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:RESTRICT"`
 	SchoolID   uint      `json:"school_id" gorm:"not null"`
 	School     *School   `json:"school,omitempty" gorm:"foreignKey:SchoolID;references:ID;constraint:OnUpdate:RESTRICT,OnDelete:CASCADE"`
 	ClassID    uint      `json:"class_id" gorm:"not null"`
@@ -32,6 +32,7 @@ type StudentResponse struct {
 	NISN       string          `json:"nisn"`
 	Class      *ClassResponse  `json:"class,omitempty"`
 	Parent     *ParentResponse `json:"parent,omitempty"`
+	Email      string          `json:"email"`
 }
 
 type ClassResponse struct {

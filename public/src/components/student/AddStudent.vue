@@ -34,6 +34,15 @@
                                 placeholder="Nama Lengkap" required>
                             <label for="fullName">Nama Lengkap</label>
                         </div>
+                        <div class="form-floating mb-3">
+                            <select id="class" v-model="student.class_id" class="form-select" required>
+                                <option disabled value="">Pilih Kelas</option>
+                                <option v-for="cls in classes" :key="cls.id" :value="cls.id">
+                                    {{ cls.name }}
+                                </option>
+                            </select>
+                            <label for="class">Kelas</label>
+                        </div>
                     </div>
                     <div class="col">
                         <div class="form-floating mb-3">
@@ -52,13 +61,14 @@
                             <label for="bornDate">Tanggal Lahir</label>
                         </div>
                         <div class="form-floating mb-3">
-                            <select id="class" v-model="student.class_id" class="form-select" required>
-                                <option disabled value="">Pilih Kelas</option>
-                                <option v-for="cls in classes" :key="cls.id" :value="cls.id">
-                                    {{ cls.name }}
-                                </option>
-                            </select>
-                            <label for="class">Kelas</label>
+                            <input type="text" id="parentName" v-model="student.parent_name" class="form-control"
+                                placeholder="Nama Orang Tua">
+                            <label for="parentName">Nama Orang Tua</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" id="parentWhatsapp" v-model="student.parent_whatsapp" class="form-control"
+                                placeholder="WhatsApp Orang Tua">
+                            <label for="parentWhatsapp">WhatsApp Orang Tua</label>
                         </div>
                     </div>
                 </div>
@@ -86,7 +96,9 @@ const student = reactive({
     birth_place: '',
     born: '',
     whatsapp: '',
-    class_id: ''
+    class_id: '',
+    parent_name: '',
+    parent_whatsapp: ''
 })
 
 const classes = reactive([])

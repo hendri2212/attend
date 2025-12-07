@@ -42,6 +42,7 @@ func (h *StudentHandler) GetStudentByID(c *gin.Context) {
 	if err := h.db.
 		Preload("Class").
 		Preload("Parent").
+		Preload("User").
 		First(&student, "user_id = ?", id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{"error": "student not found"})
@@ -59,6 +60,7 @@ func (h *StudentHandler) GetStudentByID(c *gin.Context) {
 		Born:       student.Born,
 		RFID:       student.RFID,
 		NISN:       student.NISN,
+		Email:      student.User.Email,
 	}
 	if student.Class != nil {
 		response.Class = &models.ClassResponse{
@@ -146,14 +148,16 @@ func (h *StudentHandler) SaveStudent(c *gin.Context) {
 	}
 
 	type SaveStudentRequest struct {
-		Email      string `json:"email" binding:"required,email"`
-		NISN       string `json:"nisn" binding:"required"`
-		FullName   string `json:"full_name" binding:"required"`
-		RFID       string `json:"rfid"`
-		WhatsApp   string `json:"whatsapp"`
-		BirthPlace string `json:"birth_place"`
-		Born       string `json:"born" binding:"required"`
-		ClassID    uint   `json:"class_id" binding:"required"`
+		Email          string `json:"email" binding:"required,email"`
+		NISN           string `json:"nisn" binding:"required"`
+		FullName       string `json:"full_name" binding:"required"`
+		RFID           string `json:"rfid"`
+		WhatsApp       string `json:"whatsapp"`
+		BirthPlace     string `json:"birth_place"`
+		Born           string `json:"born" binding:"required"`
+		ClassID        uint   `json:"class_id" binding:"required"`
+		ParentName     string `json:"parent_name"`
+		ParentWhatsApp string `json:"parent_whatsapp"`
 	}
 
 	var req SaveStudentRequest
@@ -164,6 +168,9 @@ func (h *StudentHandler) SaveStudent(c *gin.Context) {
 	// Convert WhatsApp if starts with '0' to '62...'
 	if len(req.WhatsApp) > 0 && req.WhatsApp[0] == '0' {
 		req.WhatsApp = "62" + req.WhatsApp[1:]
+	}
+	if len(req.ParentWhatsApp) > 0 && req.ParentWhatsApp[0] == '0' {
+		req.ParentWhatsApp = "62" + req.ParentWhatsApp[1:]
 	}
 
 	bornTime, err := time.Parse("2006-01-02", req.Born)
@@ -179,6 +186,28 @@ func (h *StudentHandler) SaveStudent(c *gin.Context) {
 	}
 
 	if err := h.db.Transaction(func(tx *gorm.DB) error {
+		// 1. Handle Parent
+		var parentID *uint
+		if req.ParentWhatsApp != "" {
+			var parent models.Parent
+			// Check if parent exists by WhatsApp
+			if err := tx.Where("whatsapp = ?", req.ParentWhatsApp).First(&parent).Error; err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					// Create new parent
+					parent = models.Parent{
+						FullName: req.ParentName,
+						WhatsApp: req.ParentWhatsApp,
+					}
+					if err := tx.Create(&parent).Error; err != nil {
+						return err
+					}
+				} else {
+					return err
+				}
+			}
+			parentID = &parent.ID
+		}
+
 		user := models.User{
 			Email:    req.Email,
 			Password: string(hashedPwd),
@@ -199,6 +228,7 @@ func (h *StudentHandler) SaveStudent(c *gin.Context) {
 			WhatsApp:   req.WhatsApp,
 			BirthPlace: req.BirthPlace,
 			Born:       bornTime,
+			ParentID:   parentID,
 		}
 		if err := tx.Create(&student).Error; err != nil {
 			return err
@@ -232,6 +262,8 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 		Born       string `json:"born" binding:"required"`
 		WhatsApp   string `json:"whatsapp"`
 		ParentID   *uint  `json:"parent_id"`
+		Email      string `json:"email"`
+		ClassID    uint   `json:"class_id"`
 	}
 
 	var req UpdateStudentRequest
@@ -250,26 +282,46 @@ func (h *StudentHandler) UpdateStudent(c *gin.Context) {
 		return
 	}
 
-	var student models.Student
-	if err := h.db.First(&student, "user_id = ?", id).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+	if err := h.db.Transaction(func(tx *gorm.DB) error {
+		var student models.Student
+		if err := tx.Preload("User").First(&student, "user_id = ?", id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return fmt.Errorf("student not found")
+			}
+			return err
+		}
+
+		// Update User fields (Email)
+		if req.Email != "" && student.User.Email != req.Email {
+			student.User.Email = req.Email
+			if err := tx.Save(student.User).Error; err != nil {
+				return err
+			}
+		}
+
+		// Update Student fields
+		student.RFID = req.RFID
+		student.NISN = req.NISN
+		student.FullName = req.FullName
+		student.BirthPlace = req.BirthPlace
+		student.Born = bornTime
+		student.WhatsApp = req.WhatsApp
+		student.ParentID = req.ParentID
+
+		if req.ClassID != 0 {
+			student.ClassID = req.ClassID
+		}
+
+		if err := tx.Save(&student).Error; err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		if err.Error() == "student not found" {
 			c.JSON(http.StatusNotFound, gin.H{"error": "student not found"})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "internal server error"})
-		return
-	}
-
-	student.RFID = req.RFID
-	student.NISN = req.NISN
-	student.FullName = req.FullName
-	student.BirthPlace = req.BirthPlace
-	student.Born = bornTime
-	student.WhatsApp = req.WhatsApp
-	student.ParentID = req.ParentID
-
-	if err := h.db.Save(&student).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update student"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to update student: " + err.Error()})
 		return
 	}
 

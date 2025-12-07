@@ -61,6 +61,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 		api.GET("/students", studentsHandler.GetStudents)
 		api.POST("/students", studentsHandler.SaveStudent)
+		api.POST("/students/import", studentsHandler.ImportStudents)
 		api.GET("/students/:id", studentsHandler.GetStudentByID)
 		api.PUT("/students/:id", studentsHandler.UpdateStudent)
 		api.DELETE("/students/:id", studentsHandler.DeleteStudent)

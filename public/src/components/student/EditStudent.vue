@@ -25,10 +25,26 @@
                             <label for="nisn">NISN</label>
                         </div>
                         <div class="form-floating mb-3">
+                            <input type="email" id="email" v-model="student.email" class="form-control" placeholder="Email">
+                            <label for="email">Email</label>
+                        </div>
+                        <div class="form-floating mb-3">
                             <input type="text" id="fullName" v-model="student.full_name" class="form-control"
                                 placeholder="Nama Lengkap" required>
                             <label for="fullName">Nama Lengkap</label>
                         </div>
+                        <!-- Kelas -->
+                        <div class="form-floating mb-3">
+                            <select id="class" v-model="student.class_id" class="form-select" required>
+                                <option disabled value="">Pilih Kelas</option>
+                                <option v-for="cls in classes" :key="cls.id" :value="cls.id">
+                                    {{ cls.name }}
+                                </option>
+                            </select>
+                            <label for="class">Kelas</label>
+                        </div>
+                    </div>
+                    <div class="col">
                         <div class="form-floating mb-3">
                             <input type="text" id="whatsapp" v-model="student.whatsapp" class="form-control"
                                 placeholder="No. WhatsApp">
@@ -44,8 +60,7 @@
                                 placeholder="Tanggal Lahir">
                             <label for="bornDate">Tanggal Lahir</label>
                         </div>
-                    </div>
-                    <div class="col">
+                        <!-- Parent Fields -->
                         <div class="form-floating mb-3">
                             <select id="parentId" v-model="student.parent_id" class="form-select">
                                 <option disabled value="">Pilih Orang Tua</option>
@@ -76,6 +91,7 @@ const route = useRoute()
 const router = useRouter()
 const studentId = route.params.id
 
+const classes = ref([])
 const parents = ref([])
 
 // Reactive object to bind to the form
@@ -86,7 +102,9 @@ const student = reactive({
     birth_place: '',
     born: '',
     whatsapp: '',
-    parent_id: ''
+    email: '',
+    class_id: '',
+    parent_id: '',
 })
 
 /**
@@ -113,11 +131,27 @@ const fetchStudent = async () => {
             birth_place: data.birth_place ?? '',
             born: data.born ? data.born.split('T')[0] : '',
             whatsapp: data.whatsapp ?? '',
+            email: data.email ?? '',
+            class_id: data.class?.id ?? '',
             parent_id: data.parent?.id ?? ''
         })
     } catch (err) {
         console.error(err)
         alert('Gagal memuat data siswa')
+    }
+}
+
+const fetchClasses = async () => {
+    try {
+        const token = localStorage.getItem('token')
+        if (!token) return
+
+        const { data } = await axios.get(`${apiBaseUrl}/classes`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        classes.value = data
+    } catch (err) {
+        console.error('Gagal memuat data kelas:', err)
     }
 }
 
@@ -137,6 +171,7 @@ const fetchParents = async () => {
 
 onMounted(() => {
     fetchStudent()
+    fetchClasses()
     fetchParents()
 })
 
