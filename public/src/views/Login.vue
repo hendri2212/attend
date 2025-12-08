@@ -61,6 +61,7 @@ const handleLogin = async () => {
 
         if (data.token) {
             localStorage.setItem('token', data.token)
+            localStorage.setItem('role', data.role)
             router.push('/admin')
         } else {
             throw new Error('Token not found in response')

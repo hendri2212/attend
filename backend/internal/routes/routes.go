@@ -42,6 +42,7 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	parentsHandler := handlers.ParentsHandler(db)
 	studentsHandler := handlers.StudentsHandler(db)
 	classesHandler := handlers.ClassesHandler(db)
+	schoolsHandler := handlers.SchoolsHandler(db)
 	// budgetsHandler := handlers.BudgetsHandler(db)
 
 	api := router.Group("/api")
@@ -51,13 +52,16 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 			c.JSON(http.StatusOK, gin.H{"message": "logout successful"})
 		})
 		api.GET("/student/:rf_id", studentsHandler.GetStudentByRFID)
+		api.GET("/schools", schoolsHandler.GetSchools) // Public for login/register if needed, or moved to auth
 
 		api.Use(middlewares.AuthMiddleware())
 
-		// api.GET("/me", userHandler.Me)
-		// api.GET("/users", userHandler.GetUsers)
-		// api.GET("/users/:id", userHandler.GetUserByID)
-		// api.DELETE("/users/:id", userHandler.DeleteUser)
+		api.GET("/me", userHandler.Me)
+		api.GET("/users", userHandler.GetUsers)
+		api.POST("/users", userHandler.CreateUser)
+		api.GET("/users/:id", userHandler.GetUserByID)
+		api.PUT("/users/:id", userHandler.UpdateUser)
+		api.DELETE("/users/:id", userHandler.DeleteUser)
 
 		api.GET("/students", studentsHandler.GetStudents)
 		api.POST("/students", studentsHandler.SaveStudent)

@@ -142,6 +142,15 @@ const router = createRouter({
                     meta: {
                         title: 'Laporan',
                     },
+                },
+                {
+                    path: 'users',
+                    name: 'users',
+                    component: () => import('../components/user/DataUsers.vue'),
+                    meta: {
+                        title: 'Manajemen User',
+                        restrictTo: ['superadmin']
+                    },
                 }
             ],
         },
@@ -156,6 +165,16 @@ router.beforeEach((to) => {
     // If route needs auth but no token, redirect to /login
     if (to.meta.requiresAuth && !localStorage.getItem('token')) {
         return { name: 'login', query: { redirect: to.fullPath } }
+    }
+
+    // Check for role restriction
+    if (to.meta.restrictTo) {
+        const role = localStorage.getItem('role')
+        if (!to.meta.restrictTo.includes(role)) {
+            // Redirect to admin dashboard if not authorized
+            // Or maybe show an alert? For now just redirect
+            return { name: 'dashboard' }
+        }
     }
 })
 

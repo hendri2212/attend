@@ -25,7 +25,7 @@ func (h *ClassHandler) GetClassBySchool(c *gin.Context) {
 	schoolID := schoolIDInterface.(uint)
 
 	var classes []models.Class
-	query := h.db.Preload("School").Where("school_id = ?", schoolID)
+	query := h.db.Preload("School").Where("school_id = ?", schoolID).Order("name asc")
 
 	query.Find(&classes)
 

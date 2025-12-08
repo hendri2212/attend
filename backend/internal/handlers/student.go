@@ -92,8 +92,10 @@ func (h *StudentHandler) GetStudents(c *gin.Context) {
 
 	var students []models.Student
 	if err := h.db.
+		Joins("JOIN classes ON classes.id = students.class_id").
 		Preload("Class").
 		Preload("Parent").
+		Order("classes.name asc").
 		Limit(size).
 		Offset(offset).
 		Find(&students).Error; err != nil {
@@ -191,7 +193,7 @@ func (h *StudentHandler) SaveStudent(c *gin.Context) {
 		if req.ParentWhatsApp != "" {
 			var parent models.Parent
 			// Check if parent exists by WhatsApp
-			if err := tx.Where("whatsapp = ?", req.ParentWhatsApp).First(&parent).Error; err != nil {
+			if err := tx.Where("whats_app = ?", req.ParentWhatsApp).First(&parent).Error; err != nil {
 				if errors.Is(err, gorm.ErrRecordNotFound) {
 					// Create new parent
 					parent = models.Parent{

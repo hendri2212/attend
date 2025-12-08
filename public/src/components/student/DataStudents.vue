@@ -65,7 +65,15 @@
                         </div>
                         <div class="col-12 col-md-3">
                             <small class="d-block text-muted">Orang Tua</small>
-                            <span class="fw-bold text-dark">{{ student.parent?.full_name || '-' }}</span>
+                            <span class="fw-bold text-dark">
+                                <a v-if="student.parent?.whatsapp" 
+                                   :href="`https://wa.me/${student.parent.whatsapp}`" 
+                                   target="_blank" 
+                                   class="text-decoration-none text-dark d-flex align-items-center gap-1">
+                                   {{ student.parent.full_name }} <i class="bi bi-whatsapp text-success small"></i>
+                                </a>
+                                <span v-else>{{ student.parent?.full_name || '-' }}</span>
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -66,7 +66,8 @@
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="{ name: 'report' }" class="nav-link link-body-emphasis">
+                            <RouterLink :to="{ name: 'report' }" 
+                                :class="['nav-link', ['report'].includes(route.name) ? 'active' : 'link-body-emphasis']">
                                 <i class="bi bi-file-earmark-text me-2" width="16" height="16"></i>
                                 Laporan
                             </RouterLink>
@@ -85,6 +86,18 @@
                         </li> -->
                     </ul>
                 </div>
+                <div class="mt-3" v-if="role === 'superadmin'">
+                    <p class="text-uppercase text-secondary fw-semibold small mb-2">System</p>
+                    <ul class="nav nav-pills flex-column gap-1">
+                        <li>
+                            <RouterLink :to="{ name: 'users' }"
+                                :class="['nav-link', ['users'].includes(route.name) ? 'active' : 'link-body-emphasis']">
+                                <i class="bi bi-person-gear me-2" width="16" height="16"></i>
+                                Manajemen User
+                            </RouterLink>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div class="ms-3 w-100">
@@ -96,7 +109,14 @@
 <script setup>
 import Navbar from '../components/Navbar.vue'
 import { RouterLink, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+
 const route = useRoute()
+const role = ref('')
+
+onMounted(() => {
+    role.value = localStorage.getItem('role') || ''
+})
 </script>
 <style scoped>
 .sidebar {
