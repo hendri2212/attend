@@ -46,6 +46,11 @@ func main() {
 		log.Fatal("failed to migrate database: ", err)
 	}
 
+	// Create Triggers
+	if err := models.CreateTriggers(db); err != nil {
+		log.Fatal("failed to create triggers: ", err)
+	}
+
 	// Seed data
 	seeds.SeedAll(db)
 

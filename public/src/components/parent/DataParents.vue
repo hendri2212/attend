@@ -30,7 +30,15 @@
                         </div>
                         <div class="col-12 col-md-4">
                             <small class="d-block text-muted">No. Whatsapp</small>
-                            <span class="fw-bold text-dark">{{ parent.whatsapp || '-' }}</span>
+                            <span class="fw-bold text-dark">
+                                <a v-if="parent.whatsapp" 
+                                   :href="`https://wa.me/${parent.whatsapp}`" 
+                                   target="_blank" 
+                                   class="text-decoration-none text-dark d-flex align-items-center gap-1">
+                                    {{ parent.whatsapp }} <i class="bi bi-whatsapp text-success small"></i>
+                                </a>
+                                <span v-else>-</span>
+                            </span>
                         </div>
                         <div class="col-12 col-md-4">
                             <small class="d-block text-muted">Alamat</small>
