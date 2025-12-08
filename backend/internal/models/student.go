@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Student struct {
 	UserID     uint      `json:"user_id" gorm:"primaryKey"`
@@ -44,4 +48,13 @@ type ParentResponse struct {
 	ID       uint   `json:"id"`
 	FullName string `json:"full_name"`
 	WhatsApp string `json:"whatsapp"`
+}
+
+// AfterDelete is a GORM hook that runs after a Student is deleted.
+// It ensures the associated User is also deleted, replacing the database trigger.
+func (s *Student) AfterDelete(tx *gorm.DB) (err error) {
+	if s.UserID != 0 {
+		return tx.Delete(&User{}, s.UserID).Error
+	}
+	return nil
 }
