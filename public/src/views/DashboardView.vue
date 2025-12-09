@@ -73,7 +73,8 @@
                             </RouterLink>
                         </li>
                         <li>
-                            <RouterLink :to="''" class="nav-link link-body-emphasis">
+                            <RouterLink :to="{ name: 'graphical-report' }"
+                                :class="['nav-link', ['graphical-report'].includes(route.name) ? 'active' : 'link-body-emphasis']">
                                 <i class="bi bi-bar-chart-line me-2" width="16" height="16"></i>
                                 Grafik
                             </RouterLink>
@@ -87,6 +88,7 @@
                     </ul>
                 </div>
                 <div class="mt-3" v-if="role === 'superadmin'">
+                    <hr>
                     <p class="text-uppercase text-secondary fw-semibold small mb-2">System</p>
                     <ul class="nav nav-pills flex-column gap-1">
                         <li>

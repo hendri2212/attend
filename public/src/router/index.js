@@ -23,6 +23,14 @@ const router = createRouter({
             component: HomeView,
         },
         {
+            path: '/register',
+            name: 'register',
+            component: () => import('../views/Login.vue'),
+            meta: {
+                title: 'Register',
+            },
+        },
+        {
             path: '/login',
             name: 'login',
             component: () => import('../views/Login.vue'),
@@ -141,6 +149,14 @@ const router = createRouter({
                     component: () => import('../components/report/DataReport.vue'),
                     meta: {
                         title: 'Laporan',
+                    },
+                },
+                {
+                    path: 'graphical-report',
+                    name: 'graphical-report',
+                    component: () => import('../components/report/GraphicalReport.vue'),
+                    meta: {
+                        title: 'Laporan Grafis',
                     },
                 },
                 {

@@ -7,16 +7,21 @@
                         <h5 class="mb-0 fw-bold">Daftar Siswa</h5>
                         <span class="badge rounded-pill bg-secondary-subtle text-primary d-flex align-items-center px-3 py-1">
                             <i class="bi bi-person me-2"></i>
-                            <span class="small">{{ students.length }} Siswa</span>
+                            <span class="small">{{ filteredStudents.length }} Siswa</span>
                         </span>
                     </div>
                     <p class="text-muted small mb-0">
                         Kelola daftar siswa, tambah, ubah, dan hapus sesuai kebutuhan.
                     </p>
                 </div>
-                <div class="d-flex gap-2">
+                <div class="d-flex gap-2 align-items-center">
+                    <select v-model="selectedClassId" class="form-select border-primary" style="width: auto; min-width: 150px;">
+                        <option :value="null">Semua Kelas</option>
+                        <option v-for="cls in classes" :key="cls.id" :value="cls.id">{{ cls.name }}</option>
+                    </select>
                     <RouterLink :to="{ name: 'create-student' }" class="btn btn-outline-primary d-flex align-items-center">
-                        <i class="bi bi-plus-lg me-2"></i>Siswa
+                        <i class="bi bi-plus-lg me-2"></i>
+                        Siswa
                     </RouterLink>
                     <button
                         type="button"
@@ -29,13 +34,13 @@
                 </div>
             </div>
             <hr>
-            <div v-if="students.length === 0" class="text-center text-muted py-4 small">
+            <div v-if="filteredStudents.length === 0" class="text-center text-muted py-4 small">
                 Tidak ada data siswa.
             </div>
 
             <div
                 v-else
-                v-for="student in students"
+                v-for="student in filteredStudents"
                 :key="student.id || student.full_name"
                 class="d-flex align-items-center mb-3 shadow-sm p-3"
             >
@@ -136,12 +141,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { apiBaseUrl } from '@/config'
 
 const students = ref([])
+const classes = ref([])
+const selectedClassId = ref(null)
 const loading = ref(false)
+
+const filteredStudents = computed(() => {
+    if (selectedClassId.value === null) {
+        return students.value
+    }
+    return students.value.filter(s => s.class?.id === selectedClassId.value)
+})
 
 // Import Logic
 const showImportModal = ref(false)
@@ -247,8 +261,20 @@ const uploadFile = async () => {
     }
 }
 
+const fetchClasses = async () => {
+    try {
+        const res = await axios.get(`${apiBaseUrl}/classes`, {
+            headers: getAuthHeaders(),
+        })
+        classes.value = res.data || []
+    } catch (error) {
+        console.error('Failed to fetch classes', error)
+    }
+}
+
 onMounted(() => {
     fetchStudents()
+    fetchClasses()
 })
 
 const formatDateID = (value) => {
