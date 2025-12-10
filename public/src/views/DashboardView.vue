@@ -92,6 +92,13 @@
                     <p class="text-uppercase text-secondary fw-semibold small mb-2">System</p>
                     <ul class="nav nav-pills flex-column gap-1">
                         <li>
+                            <RouterLink :to="{ name: 'teacher' }"
+                                :class="['nav-link', ['teacher'].includes(route.name) ? 'active' : 'link-body-emphasis']">
+                                <i class="bi bi-person-gear me-2" width="16" height="16"></i>
+                                Teacher
+                            </RouterLink>
+                        </li>
+                        <li>
                             <RouterLink :to="{ name: 'users' }"
                                 :class="['nav-link', ['users'].includes(route.name) ? 'active' : 'link-body-emphasis']">
                                 <i class="bi bi-person-gear me-2" width="16" height="16"></i>

@@ -160,6 +160,14 @@ const router = createRouter({
                     },
                 },
                 {
+                    path: 'teacher',
+                    name: 'teacher',
+                    component: () => import('../components/teacher/DataTeacher.vue'),
+                    meta: {
+                        title: 'Data Guru',
+                    },
+                },
+                {
                     path: 'users',
                     name: 'users',
                     component: () => import('../components/user/DataUsers.vue'),

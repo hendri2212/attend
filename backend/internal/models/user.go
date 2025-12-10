@@ -17,7 +17,7 @@ const (
 type User struct {
 	ID        uint     `json:"id" gorm:"primaryKey"`
 	Email     string   `json:"email" gorm:"unique;size:50"`
-	Password  string   `json:"password" gorm:"size:60"`
+	Password  string   `json:"-" gorm:"size:60"`
 	Role      UserRole `json:"role" gorm:"type:ENUM('superadmin','admin','teacher','student');default:'student'"`
 	IsActive  bool     `json:"is_active" gorm:"default:true"`
 	SchoolID  uint     `json:"school_id" gorm:"not null"`
