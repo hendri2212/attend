@@ -6,10 +6,14 @@
                     <h5 class="mb-1 fw-bold">Import Siswa Per Kelas</h5>
                     <p class="text-muted small mb-0">Pilih kelas terlebih dahulu, lalu unggah file template siswa.</p>
                 </div>
-                <a class="btn btn-outline-primary d-flex align-items-center" href="#" role="button">
+                <button 
+                    type="button"
+                    class="btn btn-outline-primary d-flex align-items-center"
+                    @click="downloadTemplate"
+                >
                     <i class="bi bi-download me-2"></i>
                     Unduh Template
-                </a>
+                </button>
             </div>
 
             <hr>
@@ -81,13 +85,29 @@
                 </div>
 
                 <div class="col-12 d-flex justify-content-end gap-2 mt-2">
-                    <button type="button" class="btn btn-outline-secondary" @click="goBack">
+                    <button type="button" class="btn btn-outline-secondary" @click="goBack" :disabled="importLoading">
                         Batal
                     </button>
-                    <button type="submit" class="btn btn-success" :disabled="!canImport">
-                        <i class="bi bi-check-circle me-2"></i>
+                    <button type="submit" class="btn btn-success" :disabled="!canImport || importLoading">
+                        <span v-if="importLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <i v-else class="bi bi-check-circle me-2"></i>
                         Import
                     </button>
+                </div>
+                
+                <!-- Result Section -->
+                <div class="col-12 mt-3" v-if="importResult.message || importResult.errors.length">
+                     <div v-if="importResult.message" class="alert alert-success small">
+                        <i class="bi bi-check-circle me-1"></i>
+                        {{ importResult.message }} ({{ importResult.successCount }} berhasil)
+                    </div>
+
+                    <div v-if="importResult.errors.length > 0" class="alert alert-danger small" style="max-height: 200px; overflow-y: auto;">
+                        <strong>Gagal:</strong>
+                        <ul class="mb-0 ps-3">
+                            <li v-for="(err, idx) in importResult.errors" :key="idx">{{ err }}</li>
+                        </ul>
+                    </div>
                 </div>
             </form>
 
@@ -138,8 +158,16 @@ const onFileChange = (event) => {
     fileName.value = file ? file.name : ''
 }
 
+const importLoading = ref(false)
+const importResult = ref({
+    message: '',
+    successCount: 0,
+    errors: []
+})
+
 const resetFile = () => {
     fileName.value = ''
+    importResult.value = { message: '', successCount: 0, errors: [] }
     if (fileInput.value) {
         fileInput.value.value = ''
     }
@@ -147,14 +175,73 @@ const resetFile = () => {
 
 const canImport = computed(() => !!selectedClass.value && !!fileName.value)
 
-const handleImport = () => {
-    // Hanya desain UI: aksi import akan dihubungkan ke backend nanti
-    if (canImport.value) {
-        alert(`Siap import siswa untuk kelas ID ${selectedClass.value} dengan file ${fileName.value}`)
+const handleImport = async () => {
+    if (!canImport.value) return
+    
+    importLoading.value = true
+    importResult.value = { message: '', successCount: 0, errors: [] }
+
+    const formData = new FormData()
+    if (fileInput.value?.files?.[0]) {
+        formData.append('file', fileInput.value.files[0])
+    }
+    formData.append('class_id', selectedClass.value.toString())
+    
+    
+    
+    try {
+        const getAuthHeaders = () => {
+             const token = localStorage.getItem('token')
+             return token ? { Authorization: `Bearer ${token}` } : {}
+        }
+
+        const { data } = await axios.post(`${apiBaseUrl}/students/import`, formData, {
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        
+        importResult.value = {
+            message: data.message,
+            successCount: data.success_count,
+            errors: data.errors || []
+        }
+        
+    } catch (error) {
+        console.error(error)
+        importResult.value = {
+            message: '',
+            successCount: 0,
+            errors: [error.response?.data?.error || 'Gagal mengupload file']
+        }
+    } finally {
+        importLoading.value = false
     }
 }
 
 const goBack = () => {
     router.back()
+}
+
+const downloadTemplate = async () => {
+    try {
+        const response = await fetch(`${apiBaseUrl.replace('/api', '')}/templates/format_import_students.xlsx`)
+        if (!response.ok) {
+            throw new Error('File not found')
+        }
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'format_import_students.xlsx'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+    } catch (error) {
+        console.error('Download failed:', error)
+        alert('Gagal mengunduh template. Silakan coba lagi.')
+    }
 }
 </script>

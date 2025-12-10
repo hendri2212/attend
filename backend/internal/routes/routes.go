@@ -12,8 +12,6 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine, db *gorm.DB) {
-	router.Static("/uploads", "./uploads")
-
 	var allowedOrigins []string
 	if gin.Mode() == gin.ReleaseMode {
 		allowedOrigins = []string{
@@ -36,6 +34,10 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 	router.OPTIONS("/*path", func(c *gin.Context) {
 		c.AbortWithStatus(http.StatusNoContent)
 	})
+
+	// Static routes (after CORS middleware)
+	router.Static("/uploads", "./uploads")
+	router.Static("/templates", "./templates")
 
 	userHandler := handlers.UsersHandler(db)
 	teachersHandler := handlers.TeachersHandler(db)

@@ -22,6 +22,18 @@ func (h *StudentHandler) ImportStudents(c *gin.Context) {
 	}
 	schoolID := schoolIDVal.(uint)
 
+	// Get class_id from form data
+	classIDStr := c.PostForm("class_id")
+	if classIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "class_id is required"})
+		return
+	}
+	classID, err := strconv.Atoi(classIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid class_id"})
+		return
+	}
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "file is required"})
@@ -64,24 +76,23 @@ func (h *StudentHandler) ImportStudents(c *gin.Context) {
 	// Skip header row (index 0)
 	for i, row := range rows {
 		if i == 0 {
-			// Header: email, nisn, full_name, born, class_id, rfid, whatsapp, birth_place, parent_name, parent_whatsapp
+			// Header: email, nisn, full_name, born, rfid, whatsapp, birth_place, parent_name, parent_whatsapp
 			continue
 		}
 
-		// Expected columns mapping (based on previous discussion)
+		// Expected columns mapping (class_id now comes from form data)
 		// 0: email (mandatory)
 		// 1: nisn (mandatory)
 		// 2: full_name (mandatory)
 		// 3: born (mandatory YYYY-MM-DD)
-		// 4: class_id (mandatory)
-		// 5: rfid (optional)
-		// 6: whatsapp (optional)
-		// 7: birth_place (optional)
-		// 8: parent_name (optional)
-		// 9: parent_whatsapp (optional)
+		// 4: rfid (optional)
+		// 5: whatsapp (optional)
+		// 6: birth_place (optional)
+		// 7: parent_name (optional)
+		// 8: parent_whatsapp (optional)
 
-		if len(row) < 5 {
-			errorsList = append(errorsList, fmt.Sprintf("Row %d: Incomplete data (min 5 columns required)", i+1))
+		if len(row) < 4 {
+			errorsList = append(errorsList, fmt.Sprintf("Row %d: Incomplete data (min 4 columns required)", i+1))
 			continue
 		}
 
@@ -89,39 +100,31 @@ func (h *StudentHandler) ImportStudents(c *gin.Context) {
 		nisn := strings.TrimSpace(row[1])
 		fullName := strings.TrimSpace(row[2])
 		bornStr := strings.TrimSpace(row[3])
-		classIDStr := strings.TrimSpace(row[4])
 
 		// Optional fields with safe access
 		rfid := ""
-		if len(row) > 5 {
-			rfid = strings.TrimSpace(row[5])
+		if len(row) > 4 {
+			rfid = strings.TrimSpace(row[4])
 		}
 		whatsapp := ""
-		if len(row) > 6 {
-			whatsapp = strings.TrimSpace(row[6])
+		if len(row) > 5 {
+			whatsapp = strings.TrimSpace(row[5])
 		}
 		birthPlace := ""
-		if len(row) > 7 {
-			birthPlace = strings.TrimSpace(row[7])
+		if len(row) > 6 {
+			birthPlace = strings.TrimSpace(row[6])
 		}
 		parentName := ""
-		if len(row) > 8 {
-			parentName = strings.TrimSpace(row[8])
+		if len(row) > 7 {
+			parentName = strings.TrimSpace(row[7])
 		}
 		parentWhatsApp := ""
-		if len(row) > 9 {
-			parentWhatsApp = strings.TrimSpace(row[9])
+		if len(row) > 8 {
+			parentWhatsApp = strings.TrimSpace(row[8])
 		}
 
-		if email == "" || nisn == "" || fullName == "" || bornStr == "" || classIDStr == "" {
+		if email == "" || nisn == "" || fullName == "" || bornStr == "" {
 			errorsList = append(errorsList, fmt.Sprintf("Row %d: Missing mandatory fields", i+1))
-			continue
-		}
-
-		// Convert ClassID
-		classID, err := strconv.Atoi(classIDStr)
-		if err != nil {
-			errorsList = append(errorsList, fmt.Sprintf("Row %d: Invalid Class ID", i+1))
 			continue
 		}
 
@@ -174,7 +177,7 @@ func (h *StudentHandler) ImportStudents(c *gin.Context) {
 				return fmt.Errorf("failed to create user (email likely duplicate): %v", err)
 			}
 
-			// 3. Create Student
+			// 3. Create Student (using class_id from form data)
 			student := models.Student{
 				UserID:     user.ID,
 				SchoolID:   schoolID,

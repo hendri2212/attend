@@ -94,7 +94,7 @@
                         <li>
                             <RouterLink :to="{ name: 'teacher' }"
                                 :class="['nav-link', ['teacher'].includes(route.name) ? 'active' : 'link-body-emphasis']">
-                                <i class="bi bi-person-gear me-2" width="16" height="16"></i>
+                                <i class="bi bi-mortarboard me-2" width="16" height="16"></i>
                                 Teacher
                             </RouterLink>
                         </li>
