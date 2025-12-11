@@ -37,7 +37,6 @@ func SetupRoutes(router *gin.Engine, db *gorm.DB) {
 
 	// Static routes (after CORS middleware)
 	router.Static("/uploads", "./uploads")
-	router.Static("/templates", "./templates")
 
 	userHandler := handlers.UsersHandler(db)
 	teachersHandler := handlers.TeachersHandler(db)

@@ -224,24 +224,8 @@ const goBack = () => {
     router.back()
 }
 
-const downloadTemplate = async () => {
-    try {
-        const response = await fetch(`${apiBaseUrl.replace('/api', '')}/templates/format_import_students.xlsx`)
-        if (!response.ok) {
-            throw new Error('File not found')
-        }
-        const blob = await response.blob()
-        const url = window.URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = 'format_import_students.xlsx'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        window.URL.revokeObjectURL(url)
-    } catch (error) {
-        console.error('Download failed:', error)
-        alert('Gagal mengunduh template. Silakan coba lagi.')
-    }
+const downloadTemplate = () => {
+    // Open directly in new window to bypass Vue Router
+    window.open('/format_import_students.xlsx', '_blank')
 }
 </script>
